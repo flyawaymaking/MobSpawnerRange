@@ -1,0 +1,8 @@
+# MobSpawnerRange Configuration
+
+# Дистанция активации спавнеров (в блоках)
+# Стандартная дистанция в Minecraft - 16 блоков
+activation-range: 32
+
+# Режим отладки (вывод дополнительной информации в консоль)
+debug-mode: false
