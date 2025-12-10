@@ -1,7 +1,6 @@
 package com.flyaway.mobspawnerrange;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpawnerCommand implements CommandExecutor, TabCompleter {
-
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final MobSpawnerRange plugin = MobSpawnerRange.getInstance();
 
     @Override
@@ -25,59 +24,59 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
         switch (args[0].toLowerCase()) {
             case "reload":
                 if (!sender.hasPermission("mobspawnerrange.reload")) {
-                    sender.sendMessage(ChatColor.RED + "У вас нет прав на эту команду!");
+                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
                     return true;
                 }
                 plugin.reloadPluginConfig();
-                sender.sendMessage(ChatColor.GREEN + "Конфигурация MobSpawnerRange перезагружена!");
-                sender.sendMessage(ChatColor.GREEN + "Все спавнеры обновлены с новым радиусом: " +
-                    plugin.getActivationRange() + " блоков");
+                sendMessage(sender, "<green>Конфигурация MobSpawnerRange перезагружена!");
+                sendMessage(sender, "<green>Все спавнеры обновлены с новым радиусом: " +
+                        plugin.getActivationRange() + " блоков");
                 break;
 
             case "info":
                 if (!sender.hasPermission("mobspawnerrange.info")) {
-                    sender.sendMessage(ChatColor.RED + "У вас нет прав на эту команду!");
+                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
                     return true;
                 }
-                sender.sendMessage(ChatColor.YELLOW + "=== MobSpawnerRange ===");
-                sender.sendMessage(ChatColor.GREEN + "Текущая дистанция активации: " +
-                    plugin.getActivationRange() + " блоков");
-                sender.sendMessage(ChatColor.GREEN + "Режим отладки: " +
-                    (plugin.getConfig().getBoolean("debug-mode") ? "включен" : "выключен"));
+                sendMessage(sender, "<yellow>=== MobSpawnerRange ===");
+                sendMessage(sender, "<green>Текущая дистанция активации: " +
+                        plugin.getActivationRange() + " блоков");
+                sendMessage(sender, "<green>Режим отладки: " +
+                        (plugin.getConfig().getBoolean("debug-mode") ? "включен" : "выключен"));
                 break;
 
             case "setrange":
                 if (!sender.hasPermission("mobspawnerrange.setrange")) {
-                    sender.sendMessage(ChatColor.RED + "У вас нет прав на эту команду!");
+                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
                     return true;
                 }
                 if (args.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Использование: /spawnerrange setrange <дистанция>");
+                    sendMessage(sender, "<red>Использование: /spawnerrange setrange <дистанция>");
                     return true;
                 }
                 try {
                     int newRange = Integer.parseInt(args[1]);
                     if (newRange < 1 || newRange > 128) {
-                        sender.sendMessage(ChatColor.RED + "Дистанция должна быть от 1 до 128 блоков!");
+                        sendMessage(sender, "<red>Дистанция должна быть от 1 до 128 блоков!");
                         return true;
                     }
                     plugin.getConfig().set("activation-range", newRange);
                     plugin.saveConfig();
                     plugin.reloadPluginConfig();
-                    sender.sendMessage(ChatColor.GREEN + "Дистанция активации установлена на " + newRange + " блоков!");
-                    sender.sendMessage(ChatColor.GREEN + "Все спавнеры обновлены!");
+                    sendMessage(sender, "<green>Дистанция активации установлена на " + newRange + " блоков!");
+                    sendMessage(sender, "<green>Все спавнеры обновлены!");
                 } catch (NumberFormatException e) {
-                    sender.sendMessage(ChatColor.RED + "Пожалуйста, введите корректное число!");
+                    sendMessage(sender, "<red>Пожалуйста, введите корректное число!");
                 }
                 break;
 
             case "updateall":
                 if (!sender.hasPermission("mobspawnerrange.admin")) {
-                    sender.sendMessage(ChatColor.RED + "У вас нет прав на эту команду!");
+                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
                     return true;
                 }
                 new SpawnerListener().updateAllSpawners();
-                sender.sendMessage(ChatColor.GREEN + "Все спавнеры обновлены с текущими настройками!");
+                sendMessage(sender, "<green>Все спавнеры обновлены с текущими настройками!");
                 break;
 
             default:
@@ -89,18 +88,18 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.YELLOW + "=== MobSpawnerRange Помощь ===");
+        sendMessage(sender, "<yellow>=== MobSpawnerRange Помощь ===");
         if (sender.hasPermission("mobspawnerrange.info")) {
-            sender.sendMessage(ChatColor.GREEN + "/spawnerrange info - Информация о плагине");
+            sendMessage(sender, "<green>/spawnerrange info - Информация о плагине");
         }
         if (sender.hasPermission("mobspawnerrange.reload")) {
-            sender.sendMessage(ChatColor.GREEN + "/spawnerrange reload - Перезагрузить конфиг");
+            sendMessage(sender, "<green>/spawnerrange reload - Перезагрузить конфиг");
         }
         if (sender.hasPermission("mobspawnerrange.setrange")) {
-            sender.sendMessage(ChatColor.GREEN + "/spawnerrange setrange <дистанция> - Установить дистанцию");
+            sendMessage(sender, "<green>/spawnerrange setrange <дистанция> - Установить дистанцию");
         }
         if (sender.hasPermission("mobspawnerrange.admin")) {
-            sender.sendMessage(ChatColor.GREEN + "/spawnerrange updateall - Обновить все спавнеры");
+            sendMessage(sender, "<green>/spawnerrange updateall - Обновить все спавнеры");
         }
     }
 
@@ -128,5 +127,9 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
         }
 
         return completions;
+    }
+
+    private void sendMessage(CommandSender sender, String message) {
+        sender.sendMessage(miniMessage.deserialize(message));
     }
 }
