@@ -1,6 +1,8 @@
 package com.flyaway.mobspawnerrange;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -8,22 +10,25 @@ public class MobSpawnerRange extends JavaPlugin {
 
     private static MobSpawnerRange instance;
     private int activationRange;
+    private FileConfiguration config;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private SpawnerListener spawnerListener;
 
     @Override
     public void onEnable() {
         instance = this;
 
-        // Сохраняем конфиг по умолчанию
         saveDefaultConfig();
 
-        // Загружаем настройки
         loadConfig();
 
-        // Регистрируем слушатель
-        Bukkit.getPluginManager().registerEvents(new SpawnerListener(), this);
+        SpawnerCommand spawnerCommand = new SpawnerCommand();
 
-        // Регистрируем команду
-        this.getCommand("spawnerrange").setExecutor(new SpawnerCommand());
+        getCommand("spawnerrange").setExecutor(spawnerCommand);
+        getCommand("spawnerrange").setTabCompleter(spawnerCommand);
+
+        spawnerListener = new SpawnerListener();
+        Bukkit.getPluginManager().registerEvents(spawnerListener, this);
 
         getLogger().info("MobSpawnerRange включен! Дистанция активации: " + activationRange + " блоков");
     }
@@ -34,24 +39,27 @@ public class MobSpawnerRange extends JavaPlugin {
     }
 
     private void loadConfig() {
-        FileConfiguration config = getConfig();
-
-        // Устанавливаем значения по умолчанию
-        config.addDefault("activation-range", 32);
-        config.addDefault("debug-mode", false);
-
-        config.options().copyDefaults(true);
-        saveConfig();
-
+        config = getConfig();
         activationRange = config.getInt("activation-range", 32);
     }
 
     public void reloadPluginConfig() {
         reloadConfig();
         loadConfig();
+    }
 
-        // Обновляем все спавнеры с новыми настройками
-        new SpawnerListener().updateAllSpawners();
+    public void sendMessage(CommandSender sender, String configPath, String... placeholders) {
+        String message = config.getString(configPath, "<red>Message not found: " + configPath);
+
+        if (placeholders.length > 0) {
+            for (int i = 0; i < placeholders.length; i += 2) {
+                if (i + 1 < placeholders.length) {
+                    message = message.replace("{" + placeholders[i] + "}", placeholders[i + 1]);
+                }
+            }
+        }
+
+        sender.sendMessage(miniMessage.deserialize(message));
     }
 
     public static MobSpawnerRange getInstance() {
@@ -60,5 +68,9 @@ public class MobSpawnerRange extends JavaPlugin {
 
     public int getActivationRange() {
         return activationRange;
+    }
+
+    public SpawnerListener getSpawnerListener() {
+        return spawnerListener;
     }
 }

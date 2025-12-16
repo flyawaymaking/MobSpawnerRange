@@ -1,6 +1,5 @@
 package com.flyaway.mobspawnerrange;
 
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpawnerCommand implements CommandExecutor, TabCompleter {
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final MobSpawnerRange plugin = MobSpawnerRange.getInstance();
 
     @Override
@@ -24,59 +22,64 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
         switch (args[0].toLowerCase()) {
             case "reload":
                 if (!sender.hasPermission("mobspawnerrange.reload")) {
-                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
+                    plugin.sendMessage(sender, "messages.no-permission");
                     return true;
                 }
                 plugin.reloadPluginConfig();
-                sendMessage(sender, "<green>Конфигурация MobSpawnerRange перезагружена!");
-                sendMessage(sender, "<green>Все спавнеры обновлены с новым радиусом: " +
-                        plugin.getActivationRange() + " блоков");
+                plugin.sendMessage(sender, "messages.reload-success");
                 break;
 
             case "info":
                 if (!sender.hasPermission("mobspawnerrange.info")) {
-                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
+                    plugin.sendMessage(sender, "messages.no-permission");
                     return true;
                 }
-                sendMessage(sender, "<yellow>=== MobSpawnerRange ===");
-                sendMessage(sender, "<green>Текущая дистанция активации: " +
-                        plugin.getActivationRange() + " блоков");
-                sendMessage(sender, "<green>Режим отладки: " +
-                        (plugin.getConfig().getBoolean("debug-mode") ? "включен" : "выключен"));
+                plugin.sendMessage(sender, "messages.info",
+                        "range", String.valueOf(plugin.getActivationRange()));
+
+                if (plugin.getConfig().getBoolean("debug-mode")) {
+                    plugin.sendMessage(sender, "messages.info-debug-enabled");
+                } else {
+                    plugin.sendMessage(sender, "messages.info-debug-disabled");
+                }
                 break;
 
             case "setrange":
                 if (!sender.hasPermission("mobspawnerrange.setrange")) {
-                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
+                    plugin.sendMessage(sender, "messages.no-permission");
                     return true;
                 }
                 if (args.length < 2) {
-                    sendMessage(sender, "<red>Использование: /spawnerrange setrange <дистанция>");
+                    plugin.sendMessage(sender, "messages.setrange-usage");
                     return true;
                 }
                 try {
-                    int newRange = Integer.parseInt(args[1]);
-                    if (newRange < 1 || newRange > 128) {
-                        sendMessage(sender, "<red>Дистанция должна быть от 1 до 128 блоков!");
+                    int newRange;
+                    try {
+                        newRange = Integer.parseInt(args[1]);
+                    } catch (NumberFormatException e) {
+                        plugin.sendMessage(sender, "messages.setrange-invalid");
                         return true;
                     }
                     plugin.getConfig().set("activation-range", newRange);
                     plugin.saveConfig();
                     plugin.reloadPluginConfig();
-                    sendMessage(sender, "<green>Дистанция активации установлена на " + newRange + " блоков!");
-                    sendMessage(sender, "<green>Все спавнеры обновлены!");
+                    plugin.sendMessage(sender, "messages.setrange-success",
+                            "range", String.valueOf(newRange));
+                    plugin.getSpawnerListener().updateAllSpawners();
+                    plugin.sendMessage(sender, "messages.setrange-updated");
                 } catch (NumberFormatException e) {
-                    sendMessage(sender, "<red>Пожалуйста, введите корректное число!");
+                    plugin.sendMessage(sender, "messages.invalid-number");
                 }
                 break;
 
             case "updateall":
-                if (!sender.hasPermission("mobspawnerrange.admin")) {
-                    sendMessage(sender, "<red>У вас нет прав на эту команду!");
+                if (!sender.hasPermission("mobspawnerrange.updateall")) {
+                    plugin.sendMessage(sender, "messages.no-permission");
                     return true;
                 }
-                new SpawnerListener().updateAllSpawners();
-                sendMessage(sender, "<green>Все спавнеры обновлены с текущими настройками!");
+                plugin.getSpawnerListener().updateAllSpawners();
+                plugin.sendMessage(sender, "messages.updateall-success");
                 break;
 
             default:
@@ -88,18 +91,19 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(CommandSender sender) {
-        sendMessage(sender, "<yellow>=== MobSpawnerRange Помощь ===");
+        plugin.sendMessage(sender, "messages.help-header");
+
         if (sender.hasPermission("mobspawnerrange.info")) {
-            sendMessage(sender, "<green>/spawnerrange info - Информация о плагине");
+            plugin.sendMessage(sender, "messages.help-info");
         }
         if (sender.hasPermission("mobspawnerrange.reload")) {
-            sendMessage(sender, "<green>/spawnerrange reload - Перезагрузить конфиг");
+            plugin.sendMessage(sender, "messages.help-reload");
         }
         if (sender.hasPermission("mobspawnerrange.setrange")) {
-            sendMessage(sender, "<green>/spawnerrange setrange <дистанция> - Установить дистанцию");
+            plugin.sendMessage(sender, "messages.help-setrange");
         }
-        if (sender.hasPermission("mobspawnerrange.admin")) {
-            sendMessage(sender, "<green>/spawnerrange updateall - Обновить все спавнеры");
+        if (sender.hasPermission("mobspawnerrange.updateall")) {
+            plugin.sendMessage(sender, "messages.help-updateall");
         }
     }
 
@@ -115,7 +119,7 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("mobspawnerrange.setrange")) {
                 completions.add("setrange");
             }
-            if (sender.hasPermission("mobspawnerrange.admin")) {
+            if (sender.hasPermission("mobspawnerrange.updateall")) {
                 completions.add("updateall");
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("setrange")) {
@@ -127,9 +131,5 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
         }
 
         return completions;
-    }
-
-    private void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(miniMessage.deserialize(message));
     }
 }

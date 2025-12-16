@@ -2,8 +2,7 @@ package com.flyaway.mobspawnerrange;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,39 +18,38 @@ public class SpawnerListener implements Listener {
     }
 
     private void processChunk(Chunk chunk) {
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                for (int y = chunk.getWorld().getMinHeight(); y < chunk.getWorld().getMaxHeight(); y++) {
-                    Block block = chunk.getBlock(x, y, z);
-                    if (block.getType() == Material.SPAWNER) {
-                        setupSpawner(block);
-                    }
-                }
+        for (BlockState state : chunk.getTileEntities()) {
+            if (!(state instanceof CreatureSpawner spawner)) {
+                continue;
             }
+
+            setupSpawner(spawner);
         }
     }
 
-    private void setupSpawner(Block spawnerBlock) {
-        if (!(spawnerBlock.getState() instanceof CreatureSpawner spawner)) {
-            return;
-        }
-
+    private void setupSpawner(CreatureSpawner spawner) {
         try {
             int range = plugin.getActivationRange();
             spawner.setRequiredPlayerRange(range);
-            spawner.update(true, false);
+
+            spawner.update(false, false);
 
             if (plugin.getConfig().getBoolean("debug-mode", false)) {
-                plugin.getLogger().info("✅ Установлен радиус активации " + range + " для спавнера в " + spawnerBlock.getLocation());
+                plugin.getLogger().info(
+                        "✅ Установлен радиус активации " + range +
+                                " для спавнера в " + spawner.getBlock().getLocation()
+                );
             }
-
         } catch (Exception e) {
-            plugin.getLogger().warning("Не удалось обновить спавнер в " + spawnerBlock.getLocation() + ": " + e.getMessage());
+            plugin.getLogger().warning(
+                    "Не удалось обновить спавнер в " +
+                            spawner.getBlock().getLocation() + ": " + e.getMessage()
+            );
         }
     }
 
     public void updateAllSpawners() {
-        for (org.bukkit.World world : Bukkit.getWorlds()) {
+        for (var world : Bukkit.getWorlds()) {
             for (Chunk chunk : world.getLoadedChunks()) {
                 processChunk(chunk);
             }

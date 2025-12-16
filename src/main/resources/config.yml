@@ -1,8 +1,39 @@
 # MobSpawnerRange Configuration
 
-# Дистанция активации спавнеров (в блоках)
-# Стандартная дистанция в Minecraft - 16 блоков
+# Базовая дистанция активации спавнеров в Minecraft - 16 блоков
 activation-range: 32
-
-# Режим отладки (вывод дополнительной информации в консоль)
 debug-mode: false
+
+messages:
+  # Общие сообщения
+  no-permission: "<red>У вас нет прав на эту команду!"
+  invalid-number: "<red>Пожалуйста, введите корректное число!"
+
+  # Команда reload
+  reload-success: "<green>Конфигурация MobSpawnerRange перезагружена!"
+
+  # Команда info
+  info: |
+    <gold>=== MobSpawnerRange ===
+    <yellow>Текущая дистанция активации: <green>{range}</green> блоков
+  info-debug-enabled: "<yellow>Режим отладки: <green>включен"
+  info-debug-disabled: "<yellow>Режим отладки: <red>выключен"
+
+  # Команда setrange
+  setrange-usage: "<red>Использование: /spawnerrange setrange <дистанция>"
+  setrange-invalid: "<red>Дистанция должна быть числом!"
+  setrange-success: "<green>Дистанция активации установлена на {range} блоков!"
+  setrange-updated: "<green>Все спавнеры обновлены!"
+
+  # Команда updateall
+  updateall-success: "<green>Все спавнеры обновлены с текущими настройками!"
+
+  # Команда help
+  help-header: "<gold>=== MobSpawnerRange Помощь ==="
+  help-info: "<yellow>/spawnerrange info <white>- Информация о плагине"
+  help-reload: "<yellow>/spawnerrange reload <white>- Перезагрузить конфиг"
+  help-setrange: "<yellow>/spawnerrange setrange <дистанция> <white>- Установить дистанцию"
+  help-updateall: "<yellow>/spawnerrange updateall <white>- Обновить все спавнеры"
+
+  # Ошибки
+  unknown-command: "<red>Неизвестная команда. Используйте /spawnerrange help"

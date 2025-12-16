@@ -1,19 +1,16 @@
 name: MobSpawnerRange
 main: com.flyaway.mobspawnerrange.MobSpawnerRange
-version: 1.1.0
+version: 1.2.0
 api-version: 1.21
 author: FlyAwayMaking
 website: https://github.com/flyawaymaking
 description: Увеличивает дистанцию активации спавнеров мобов
 load: POSTWORLD
-folia-supported: true
-library-load-order: AUTO
 
 commands:
   spawnerrange:
     description: Основная команда плагина MobSpawnerRange
     usage: /<command> <reload|info|setrange|updateall>
-    aliases: [msr, spawnerrange, mobspawner]
     permission: mobspawnerrange.info
 
 permissions:
@@ -23,7 +20,7 @@ permissions:
       mobspawnerrange.info: true
       mobspawnerrange.reload: true
       mobspawnerrange.setrange: true
-      mobspawnerrange.admin: true
+      mobspawnerrange.updateall: true
   mobspawnerrange.info:
     description: Просмотр информации о плагине
     default: op
@@ -33,6 +30,6 @@ permissions:
   mobspawnerrange.setrange:
     description: Изменение дистанции активации спавнеров
     default: op
-  mobspawnerrange.admin:
-    description: Все административные права плагина
+  mobspawnerrange.updateall:
+    description: Обновить дистанцию у всех активных спавнеров
     default: op
