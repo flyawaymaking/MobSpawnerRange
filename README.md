@@ -1,5 +1,8 @@
 # MobSpawnerRange Plugin
 
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/mobspawnerrange?logo=modrinth&label=downloads&color=1bd96a)](https://modrinth.com/plugin/mobspawnerrange)
+[![Modrinth Followers](https://img.shields.io/modrinth/followers/mobspawnerrange?logo=modrinth&label=followers&color=1bd96a)](https://modrinth.com/plugin/mobspawnerrange)
+
 Плагин для серверов Minecraft на основе Paper, который позволяет увеличить дистанцию активации спавна мобов из спавнеров.
 
 ## 🧩 Совместимость с версиями
